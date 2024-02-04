@@ -7,7 +7,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
 )
 
@@ -17,34 +16,24 @@ func Run() {
 		log.Fatal("Error loading .env file")
 	}
 	disToken := os.Getenv("DISCORD_TOKEN")
+	weatherApiKey := os.Getenv("WEATHER_API_KEY")
+	// Bot Service 
+	botService := NewBotService(disToken, weatherApiKey)
 
-	session, err := discordgo.New("Bot " + disToken)
+	botService.session.AddHandler(botService.messageCreate)
+
+	// Open session
+	err = botService.session.Open()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	//for testing handler discordgo
-	session.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if m.Author.ID == s.State.User.ID {
-			return
-		}
-
-		if m.Content == "hello" {
-			s.ChannelMessageSend(m.ChannelID, "world!")
-		}
-	})
-
-	session.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
-
-	err = session.Open()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer session.Close()
+	
 
 	fmt.Println("Bot is running")
-	
+
+	// Shutdown
+	defer botService.session.Close()
 	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
 }
