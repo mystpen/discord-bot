@@ -27,3 +27,7 @@ git clone git@github.com:mystpen/discord-bot.git
 ```
 go run ./cmd/bot/.
 ```
+---
+- <b>You can also test all the features with a running bot!</b> :
+    - APPLICATION ID ```1203262718031700048```
+<b>D-bot#5233<b>
